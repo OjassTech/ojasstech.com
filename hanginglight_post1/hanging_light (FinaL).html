@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Lamp with Smooth Blink & Swing</title>
+  <style>
+    body {
+      background: #000000;
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      overflow: hidden;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .ceiling {
+      position: absolute;
+      top: 0;
+      width: 25%;
+      height: 20px;
+      background: linear-gradient(to bottom, #555, #333);
+      border-radius: 5px 5px 0 0;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+      z-index: 10;
+    }
+
+    .lamp-container {
+      position: relative;
+      top: 20px;
+      width: 200px;
+      height: 400px;
+      transform-origin: top center;
+      z-index: 5;
+    }
+
+    /* Cable */
+    .cable {
+      width: 4px;
+      height: 85px;
+      background: linear-gradient(to bottom, #a9a0a0, #2f3732);
+      margin: 0 auto;
+      box-shadow: 0 0 5px rgba(0,0,0,0.3);
+    }
+
+    /* Lamp head */
+    .lamp-head {
+      width: 128px;
+      height: 84px;
+      background: linear-gradient(to bottom, #ffd700, #ff8c00, #ff6000);
+      border-radius: 65px 65px 15px 15px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 8;
+      box-shadow: 
+        0 0 20px rgba(255, 215, 0, 0.8),
+        inset 0 -5px 15px rgba(255, 140, 0, 0.9);
+      border: 2px solid #ffaa00;
+    }
+
+    /* Bulb */
+    .bulb {
+      width: 53px;
+      height: 62px;
+      background: radial-gradient(ellipse at center, #ffffcc, #ffcc00 60%, #ff9900);
+      border-radius: 50%;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      box-shadow: 
+        0 0 25px yellow,
+        0 0 45px rgba(255, 255, 0, 0.7),
+        inset 0 0 15px #ffff99;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      z-index: 9;
+    }
+
+    /* Light cone */
+    .light-cone {
+      position: absolute;
+      top: 125px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 1545px;
+      height: 1000px;
+      background: radial-gradient(ellipse at top, rgb(255 255 124 / 70%) 0%, rgb(207 207 77 / 30%) 30%, rgb(255 206 37 / 10%) 50%, rgb(211 165 40 / 5%) 70%, transparent 90%);
+      clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+      opacity: 0;
+      z-index: 1;
+      transition: opacity 0.5s ease;
+      filter: blur(2px);
+    }
+
+    /* Smooth blink */
+    .lamp-blink .bulb,
+    .lamp-blink .light-cone,
+    .lamp-blink + .text {
+      animation: blink 1s ease-in-out 4;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 0; }
+      50% { opacity: 1; }
+    }
+
+    /* When ON */
+    .lamp-on .bulb,
+    .lamp-on .light-cone {
+      opacity: 1;
+    }
+
+    /* Swing animation */
+    .swing {
+      animation: swing 5s ease-in-out infinite;
+    }
+
+    @keyframes swing {
+      0%   { transform: rotate(35deg); }
+      50%  { transform: rotate(-35deg); }
+      100% { transform: rotate(35deg); }
+    }
+
+    /* Text */
+    .text {
+      margin-top: 15%;
+      width: 100%;
+      text-align: center;
+      font-size: 90px;
+      font-family: 'Times New Roman', Times, serif;
+      color: black;
+      z-index: 9999;
+      position: absolute;
+      opacity: 0;
+      transition: color 0.3s ease, text-shadow 0.3s ease, opacity 0.3s ease;
+    }
+
+    .text.on {
+      opacity: 1;
+    }
+
+    /* Particles */
+    .particles {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      z-index: 2;
+    }
+
+    .particle {
+      position: absolute;
+      background: rgba(255, 255, 200, 0.3);
+      border-radius: 50%;
+      animation: float 15s infinite ease-in-out;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-20px) rotate(180deg); }
+    }
+
+    /* Instructions */
+    .instructions {
+      position: absolute;
+      bottom: 20px;
+      width: 100%;
+      text-align: center;
+      color: #666;
+      font-size: 14px;
+      z-index: 10;
+    }
+  </style>
+</head>
+<body>
+  
+  <div class="ceiling"></div>
+  
+  <!-- Lamp starts with blink + swing -->
+  <div class="lamp-container lamp-blink swing" id="lamp">
+    <div class="cable"></div>
+    <div class="lamp-head">
+      <div class="bulb"></div>
+    </div>
+    <div class="light-cone"></div>
+  </div>
+
+  <div class="text" id="lampText"><h2>OJASS TECH</h2></div>
+  <div class="particles" id="particles"></div>
+  
+  <!-- <div class="instructions">Click anywhere to toggle the lamp</div> -->
+
+  <script>
+    const lamp = document.getElementById("lamp");
+    const text = document.getElementById("lampText");
+    const particlesContainer = document.getElementById("particles");
+    
+    // Create floating particles
+    for (let i = 0; i < 20; i++) {
+      const particle = document.createElement('div');
+      particle.classList.add('particle');
+      
+      const size = Math.random() * 4 + 1;
+      const posX = Math.random() * 100;
+      const delay = Math.random() * 15;
+      
+      particle.style.width = `${size}px`;
+      particle.style.height = `${size}px`;
+      particle.style.left = `${posX}%`;
+      particle.style.top = `${Math.random() * 100}%`;
+      particle.style.animationDelay = `${delay}s`;
+      particle.style.opacity = Math.random() * 0.5 + 0.1;
+      
+      particlesContainer.appendChild(particle);
+    }
+
+    // After blink, keep lamp ON
+    setTimeout(() => {
+      lamp.classList.remove("lamp-blink");
+      lamp.classList.add("lamp-on");
+      text.classList.add("on");
+    }, 4000);
+
+    // Toggle lamp on click
+    let isOn = true;
+    document.body.addEventListener('click', function() {
+      if (isOn) {
+        lamp.classList.remove("lamp-on");
+        text.classList.remove("on");
+      } else {
+        lamp.classList.add("lamp-on");
+        text.classList.add("on");
+      }
+      isOn = !isOn;
+    });
+  </script>
+</body>
+</html>
